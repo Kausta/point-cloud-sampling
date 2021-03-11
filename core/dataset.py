@@ -5,7 +5,7 @@ import numpy as np
 import open3d as o3d
 from tqdm import tqdm
 
-from .util import get_rectangle_pcd, compute_overlap_ratio
+from .util import get_rectangle_pcd, compute_overlap_ratio, normalize_wrt_first
 from .sequence import Sequence
 
 
@@ -81,6 +81,16 @@ class Dataset:
 
         return pairs
 
+    # noinspection PyMethodMayBeStatic
+    def _normalize_pairs(self, valid_pairs: List[Tuple[o3d.geometry.PointCloud, o3d.geometry.PointCloud, float]]) \
+            -> List[Tuple[o3d.geometry.PointCloud, o3d.geometry.PointCloud, float]]:
+        print("Normalizing valid pairs according to first point cloud by making it centered at 0, 0, 0")
+        pairs = []
+        for pcd0, pcd1, rat in tqdm(valid_pairs):
+            pcd0, pcd1 = normalize_wrt_first(pcd0, pcd1)
+            pairs.append((pcd0, pcd1, rat))
+        return pairs
+
     def _save_voxel(self, filename: str, pcd: o3d.geometry.PointCloud):
         filename = os.path.join(self.out_dir, filename)
         o3d.io.write_point_cloud(f"{filename}.ply", pcd)
@@ -106,6 +116,8 @@ class Dataset:
         minxy_points = self._calculate_grid()
         voxel_pairs = self._find_all_pairs(minxy_points)
         valid_pairs = self._get_valid_pairs(voxel_pairs)
+        if self.normalize_output:
+            valid_pairs = self._normalize_pairs(valid_pairs)
         self._save_processed_pairs(valid_pairs)
 
     def __repr__(self) -> str:

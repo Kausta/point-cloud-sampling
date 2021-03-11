@@ -33,7 +33,7 @@ class Sequence:
         self._check_pcd()
         return np.asarray(self._pcd.points)
 
-    def get_bounds(self) -> Tuple[Tuple[float, float, float], Tuple[float, float, float]]:
+    def get_bounds(self) -> Tuple[np.ndarray, np.ndarray]:
         self._check_pcd()
         bbox = self._pcd.get_axis_aligned_bounding_box()
         return bbox.get_min_bound(), bbox.get_max_bound()

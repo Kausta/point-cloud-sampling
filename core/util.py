@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import numpy as np
 import open3d as o3d
@@ -11,7 +11,7 @@ def roi_rectangle(pcdarray: np.ndarray, minxy: np.ndarray, size: np.ndarray) -> 
     return pcdarray[inidx]
 
 
-def get_rectangle_pcd(pcdarray: np.ndarray, minxy: np.ndarray, size: np.ndarray) -> o3d.geometry.PointCloud | None:
+def get_rectangle_pcd(pcdarray: np.ndarray, minxy: np.ndarray, size: np.ndarray) -> Optional[o3d.geometry.PointCloud]:
     pts = roi_rectangle(pcdarray, minxy, size)
     if len(pts) == 0:
         return None
@@ -41,3 +41,8 @@ def get_matching_indices(source: o3d.geometry.PointCloud, target: o3d.geometry.P
         for j in idx:
             match_inds.append((i, j))
     return match_inds
+
+
+def normalize_wrt_first(pcd0: o3d.geometry.PointCloud, pcd1: o3d.geometry.PointCloud):
+    translation = -pcd0.get_center()
+    return pcd0.translate(translation), pcd1.translate(translation)
